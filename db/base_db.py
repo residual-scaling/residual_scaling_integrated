@@ -2,8 +2,13 @@ from typing import Dict, List
 
 
 class BaseDB:
-    def get(self, info: List[str]) -> str:
+    def get(self, query_txt, k):
+        """
+        :param info:
+        :param k: all for retrieval of up to k results
+        :return:
+        """
         pass
 
-    def set(self, info):
+    def set(self, txt):
         pass
