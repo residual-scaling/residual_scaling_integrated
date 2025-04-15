@@ -4,7 +4,7 @@ from util import load_model, load_db
 
 
 class ResidualModel:
-    def __init__(self, model, model_type = "local", db_type: str = "vector"):
+    def __init__(self, model, model_type: str = "local", db_type: str = "vector"):
         self.model_type = model_type
         self.model = load_model(model_type, model)
         self.db = load_db(db_type)
