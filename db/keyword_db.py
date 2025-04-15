@@ -11,7 +11,7 @@ class KeywordDB(BaseDB):
         info: in KeywordDB is a list of keywords
         """
         retrieved_info = ""
-        for keyword in txt:
+        for keyword in query_txt:
             retrieved_info += self.store[keyword]
         return retrieved_info
 
