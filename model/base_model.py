@@ -1,8 +1,8 @@
 class BaseModel:
-    def generate_distillation(self, txt: str) -> dict:
+    def generate_distillation(self, *args, **kwargs) -> dict:
         pass
 
-    def generate_answer(self, txt: str) -> str:
+    def generate_answer(self, *args, **kwargs) -> str:
         pass
 
     
