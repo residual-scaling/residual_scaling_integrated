@@ -4,6 +4,14 @@ from db.vector_db import VectorDB
 from model.base_model import BaseModel
 from model.local_model import LocalModel
 from model.openai_model import OpenAIModel
+import re
+
+
+def clean_string(input_string):
+    """
+    Cleans the input string by removing \n and *.
+    """
+    return re.sub(r'[\n|*]', '', input_string)
 
 
 def load_model(model_type: str, model: str) -> BaseModel:

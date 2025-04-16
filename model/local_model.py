@@ -1,5 +1,8 @@
 from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 from model.base_model import BaseModel
+from prompt_manager import PromptManager
+from config import model_hyperparameter
+from util import clean_string
 
 
 class LocalModel(BaseModel):
@@ -11,25 +14,19 @@ class LocalModel(BaseModel):
             device_map="auto",
             torch_dtype="auto"
         )
-
-    def get_pipline(self, pipeline_type: str):
-        return pipeline(pipeline_type, model=self.model, tokenizer=self.tokenizer)
+        self.pm = PromptManager()
+        self.pipe = pipeline("text-generation", 
+                            model=self.model, 
+                            tokenizer=self.tokenizer,
+                            do_sample=True,
+                            temperature=model_hyperparameter["temperature"]
+                            )
 
     def generate_distillation(self, txt: str) -> str:
-        pipe = self.get_pipline("summarization")
-        summarized_txt = pipe(txt)[0]["summary_text"]
+        summerization_prompt = self.pm.generate_llama_summarize_prompt(txt)
+        summarized_result = self.pipe(summerization_prompt)[0]['generated_text']
+        summarized_txt = clean_string(self.pm.retrieve_llama_summarized_content(summarized_result))
         return summarized_txt
 
     def generate_answer(self, txt: str, context: str = "") -> str:
-        # TODO use 'text-generation" or "question-answering"
-        pipe = self.get_pipline("text-generation")
-        # TODO fine-tune prompt later
-        prompt = f"Request: {txt}; Context: {context}"
-        output = pipe(
-            prompt,
-            # max_length=2000,
-            # temperature=0.7,
-            # top_p=0.9,
-            num_return_sequences=1,
-        )[0]["generated_text"]
         return output
