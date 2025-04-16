@@ -1,9 +1,3 @@
-from db.base_db import BaseDB
-from db.keyword_db import KeywordDB
-from db.vector_db import VectorDB
-from model.base_model import BaseModel
-from model.local_model import LocalModel
-from model.openai_model import OpenAIModel
 import re
 
 
@@ -14,19 +8,13 @@ def clean_string(input_string):
     return re.sub(r'[\n|*]', '', input_string)
 
 
-def load_model(model_type: str, model: str) -> BaseModel:
-    if model_type == "openai":
-        return OpenAIModel(model)
-    elif model_type == "local":
-        return LocalModel(model)
-    else:
-        raise Exception("In util.py load_model(), model_type is not recognized.")
-
-
-def load_db(db_type: str) -> BaseDB:
-    if db_type == "vector":
-        return VectorDB()
-    elif db_type == "keyword":
-        return KeywordDB()
-    else:
-        raise Exception("In util.py load_db(), model_type is not recognized.")
+def cuta_last_appearance(txt: str, keyword: str) -> str:
+    """
+    Cut the txt after the last appearance of the keyword.
+    """
+    result_start = txt.rfind(keyword)
+    if result_start < 0:
+        raise Exception("In retrieve_llama_summarized_content(), there should be a keyword but there isn't")
+    result_start += len(keyword)
+    result = txt[result_start:].strip()
+    return result

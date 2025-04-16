@@ -6,5 +6,5 @@ model_hyperparameter = {
 }
 db_hyperparameter = {
     "k": 3,
-    "bm25th": 1
+    "bm25threshold": -2
 }
