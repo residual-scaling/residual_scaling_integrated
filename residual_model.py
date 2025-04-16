@@ -11,46 +11,53 @@ class ResidualModel:
         self.db = load_db(db_type)
         self.distillation_queue = []
         self.lock = threading.Lock()
-        threading.Thread.__init__(self, target=self.process_distillation_queue)
+        
+        self.distillation_thread = threading.Thread(target=self.process_distillation_queue, daemon=True)
+        self.distillation_thread.start()
 
     def process_distillation_queue(self):
-        print("[Distill] Start distillation thread")
         log_file = open('./log/distill_log.txt', 'a')
         log_file.write("[Distill] Start distillation thread\n")
+        print("[Distill] Start distillation thread")
         log_file.flush()
 
 
         while True:
             time.sleep(3)
-            log_file.write("[Distill] check distillation queue")
+            log_file.write("[Distill] check distillation queue\n")
+            print("[Distill] check distillation queue")
             while len(self.distillation_queue) > 0:
                 cur_context = self.distillation_queue.pop(0)
                 self.lock.acquire()
-                log_file.write(f"[Distill] distilling 1 out of {len(self.distillation_queue) + 1}")
+                log_file.write(f"[Distill] distilling 1 out of {len(self.distillation_queue) + 1}\n")
+                print(f"[Distill] distilling 1 out of {len(self.distillation_queue) + 1}")
                 distilled_context = self.model.generate_distillation(cur_context)
                 self.db.put(distilled_context)
                 self.lock.release()
                 # sleep 0.1s to give user query processing the priority, creating a pseudo priority lock
                 time.sleep(0.1)
-            log_file.write("[Distill] distillation queue clean!")
+            log_file.write("[Distill] distillation queue clean!\n")
+            print("[Distill] distillation queue clean!")
             # write to disk, force the result to appear immidiately in the file
             log_file.flush()
 
     def query(self, query: str) -> str:
         self.lock.acquire()
-        print("--- Start query() --- ")
+        print("### Start plain query() ### ")
         self.model.generate_answer(query)
-        print("--- Finish query() --- ")
+        print("### Finish plain query() ### ")
         self.lock.release()
         return
 
     def query_with_residual(self, query: str) -> str:
+        print("--- Plain Querying... ---")
         self.lock.acquire()
-        print("--- Start query_with_residual() --- ")
+        print("### Start query_with_residual() ### ")
         related_contexts = self.db.get(query)
+        print(f"--- related_contexts len: {len(related_contexts)}---", )
         context = ",".join(related_contexts)
         result = self.model.generate_answer(query, context)
         self.distillation_queue.append(f"Query: {query}; Result:{result}")
-        print("--- Finish query_with_residual() --- ")
+        print("### Finish query_with_residual() ### ")
         self.lock.release()
         return result
