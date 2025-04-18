@@ -21,14 +21,13 @@ class ResidualModel:
         print("[Distill] Start distillation thread")
         log_file.flush()
 
-
         while True:
             time.sleep(3)
             log_file.write("[Distill] check distillation queue\n")
             print("[Distill] check distillation queue")
             while len(self.distillation_queue) > 0:
-                cur_context = self.distillation_queue.pop(0)
                 self.lock.acquire()
+                cur_context = self.distillation_queue.pop(0)
                 log_file.write(f"[Distill] distilling 1 out of {len(self.distillation_queue) + 1}\n")
                 print(f"[Distill] distilling 1 out of {len(self.distillation_queue) + 1}")
                 distilled_context = self.model.generate_distillation(cur_context)
